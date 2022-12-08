@@ -1,0 +1,29 @@
+{
+  "name": "run-bigpig/lgds-php-sdk",
+  "type": "library",
+  "homepage": "",
+  "description": "PHP SDK for LGDS",
+  "keywords": [
+    "sdk",
+    "lgds"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "syskey",
+      "email": "syskeykala@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "ext-curl": "*",
+    "ext-zlib": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "files": [
+      "src/LgdsSdk.php"
+    ]
+  },
+  "minimum-stability": "stable"
+}
