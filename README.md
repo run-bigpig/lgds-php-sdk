@@ -1,7 +1,6 @@
-# ThinkingData Analytics PHP SDK
+# LGDS PHP SDK
 
-本 SDK 兼容 PHP 5.5+，部分功能依赖 curl
-扩展。详细的使用文档请参考 [PHP SDK 使用指南](https://doc.thinkingdata.cn/tdamanual/installation/php_sdk_installation.html)
+本 SDK 兼容 PHP 5.5+，部分功能依赖 curl扩展。
 
 ### 集成 SDK
 
@@ -10,7 +9,7 @@
 ```json
 {
   "require": {
-    "thinkinggame/ta-php-sdk": "v2.1.0"
+    "run-bigpig/lgds-php-sdk": "v1.0.0"
   }
 }
 ```
@@ -18,74 +17,45 @@
 #### 2. 初始化SDK
 
 ```php
-require "vendor/thinkinggame/ta-php-sdk/src/TaPhpSdk.php";
+require "vendor/run-bigpig/lgds-php-sdk/src/LgdsSdk.php";
 ```
 
-在引入SDK 后，您需要创建 SDK 实例，可以通过三种方法创建 SDK 实例，只需选择其中一种即可：
+在引入SDK 后，您需要创建 SDK 实例
 
-**(1) FileConsumer**: 批量实时写本地文件，文件以天为分隔，需要与LogBus搭配使用进行数据上传。建议使用，不支持多线程
 
 ```php
-$ta = new ThinkingDataAnalytics(new FileConsumer("/home/user/log/"));
+$lgds = new LgdsSdk(new Consumer("SERVER_URL","APP_ID","Aceess_Key","Secret_Key"));
 ```
 
-传入的参数为写入本地的文件夹地址，您只需将 LogBus 的监听文件夹地址设置为此处的地址，即可使用 LogBus 进行数据的监听上传。
-
-**(2) BatchConsumer**: 批量实时地向 TA 服务器传输数据，不需要搭配传输工具，不建议在生产环境中使用，不支持多线程
-
-```php
-$ta = new ThinkingDataAnalytics(new BatchConsumer("SERVER_URL","APP_ID"));
-```
-
-SERVER_URL 为传输数据的 URL，APP_ID 为您的项目的 APP ID 如果您使用的是私有化部署的版本，请输入以下 URL:
-
-```php
-$server_url = 'https://数据采集地址';
-```
-
-**(3) DebugConsumer**: 逐条实时向 TA 服务器传输数据，当数据格式错误时会抛出异常。建议先使用 DebugConsumer 校验数据格式
-
-```php
-$ta = new ThinkingDataAnalytics(new DebugConsumer("SERVER_URL","APP_ID"));
-```
-
-#### 3. 控制台日志打印
-默认 DebugConsumer 模式开启了控制台日志打印，方便调试。您也可以手动控制日志打印的开关：
-```php
-TALogger::$enable = true; // 开启控制台日志打印
-```
+SERVER_URL 为传输数据的 URL，APP_ID 为您的项目的 APP ID,Access_Key 为您的项目AK,Secret_Key 为您的项目SK
 
 ### 使用示例
 
 #### 1. 发送事件
 
-您可以调用track来上传事件，建议您根据先前梳理的文档来设置事件的属性以及发送信息的条件，此处以玩家付费作为范例：
+您可以调用track来上传事件，此处以玩家登录作为范例：
 
 ```php
-// 用户在登录状态下的账号ID
-$account_id = "ABC12345"; 
-// 用户未登录时，可以使用产品自己生成的cookieId等唯一标识符来标注用户
-$distinct_id = "SDIF21dEJWsI232IdSJ232d2332"; 
-
+// 玩家的设备ID
+$device_id = "xxxxxxxxx"; 
+//玩家的角色ID
+$user_id = "213123sadasfdasfasf"; 
+//游戏包名
+$app_name = "app"
+//平台
+$platform="ios"
+//区服
+$server = 1
+//事件名称
+$event_name="login"
+//附加属性
 $properties = array();
+$properties["level"] = 1;
+$properties["ip"] = "114.114.114.114";
 
-// 设置本条数据的时间，如不设置，则默认取当前时间，格式为"Y-m-d H:i:s"
-$properties["#time"] = date("Y-m-d H:i:s", time());
+// 传入参数分别为，设备ID,用户ID，包名,平台,区服,事件名称,属性
+$lgds->Track($device_id,$user_id,$app_name,$platform,$server,$event_name,$properties);
 
-// 设置客户端IP，TA将会自动根据该IP地址解析其地理位置信息
-$properties["#ip"] = "123.123.123.123";
-
-// 设置事件的其他属性
-$properties["Product_Name"] = "月卡";
-$properties["Price"] = 30;
-$properties["OrderId"] = "abc_123";
-
-// 传入参数分别为，访客ID，账号ID，事件名与事件属性
-$ta->track($distinct_id, $account_id, "Payment", $properties);
-
-// 您可以只上传其中一个ID，SDK中其他需要上传用户ID的接口也可以只上传一个ID
-// $ta->track($distinct_id, null, "Payment", $properties);
-// $ta->track(null, $account_id, "Payment", $properties);
 ```
 
 参数说明：
@@ -93,13 +63,13 @@ $ta->track($distinct_id, $account_id, "Payment", $properties);
 * 事件的名称只能以字母开头，可包含数字，字母和下划线“_”，长度最大为 50 个字符，对字母大小写不敏感
 * 事件的属性是一个关联数组，其中每个元素代表一个属性
 * 数组元素的 Key 值为属性的名称，为 string 类型，规定只能以字母开头，包含数字，字母和下划线“_”，长度最大为 50 个字符，对字母大小写不敏感
-* 数组元素的 Value 值为该属性的值，支持支持 string、integer、float、boolean、DataTime
+* 数组元素的 Value 值为该属性的值，支持支持 string、integer、float、boolean
 
 #### 2. 立即提交数据
 
 ```php
 // 立即提交数据到相应的接收端
-$ta->flush();
+$lgds->flush();
 ```
 
 #### 3. 关闭 SDK
@@ -108,5 +78,5 @@ $ta->flush();
 
 ```php
 // 关闭并退出 SDK
-$ta->close();
+$lgds->close();
 ```
