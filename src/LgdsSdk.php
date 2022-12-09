@@ -30,16 +30,47 @@ class LgdsSdk
         $this->clear_public_properties();
     }
 
+    /**
+     * @param $device_id //设备ID
+     * @param $user_id //用户ID
+     * @param $app_name //包名
+     * @param $platform //平台
+     * @param $server //区服
+     * @param $properties //属性
+     * @return mixed
+     * @throws LgdsDataException
+     */
     public function User($device_id, $user_id, $app_name, $platform, $server, $properties)
     {
         return $this->add($device_id, $user_id, $app_name, $platform, $server, "user", "user", "insert", $properties);
     }
 
+    /**
+     * @param $device_id //设备ID
+     * @param $user_id //用户ID
+     * @param $app_name //包名
+     * @param $platform //平台
+     * @param $server //区服
+     * @param $properties //属性
+     * @return mixed
+     * @throws LgdsDataException
+     */
     public function UserUpdate($device_id, $user_id, $app_name, $platform, $server, $properties)
     {
         return $this->add($device_id, $user_id, $app_name, $platform, $server, "user", "user", "update", $properties);
     }
 
+    /**
+     * @param $device_id //设备ID
+     * @param $user_id //用户ID
+     * @param $app_name //包名
+     * @param $platform //平台
+     * @param $server //区服
+     * @param $event_name //事件名称
+     * @param $properties //属性
+     * @return mixed
+     * @throws LgdsDataException
+     */
     public function Track($device_id, $user_id, $app_name, $platform, $server, $event_name, $properties)
     {
         return $this->add($device_id, $user_id, $app_name, $platform, $server, $event_name, "track", "insert", $properties);
@@ -229,7 +260,7 @@ class DataConsumer extends AbstractConsumer
     private $cacheCapacity;
 
     /**
-     * 创建给定配置的 BatchConsumer 对象
+     * 创建给定配置的 Consumer 对象
      * @param string $server_url 接收端 url
      * @param string $appid 项目 APP ID
      * @param int $max_size 最大的 flush 值，默认为 20
@@ -255,6 +286,7 @@ class DataConsumer extends AbstractConsumer
         $this->url = $parsed_url['scheme'] . "://" . $parsed_url['host']
             . ((isset($parsed_url['port'])) ? ':' . $parsed_url['port'] : '')
             . '/logagent';
+        Logger::$enable = false;
     }
 
     public function __destruct()
@@ -287,7 +319,7 @@ class DataConsumer extends AbstractConsumer
             Logger::log("触发数据上报");
             return $this->flush();
         } else {
-            Logger::log("加入缓存：{$message}");
+            Logger::log("加入缓存".json_encode($message));
             return true;
         }
     }
@@ -348,6 +380,11 @@ class DataConsumer extends AbstractConsumer
         $this->isThrowException = true;
     }
 
+    public function openLogger()
+    {
+        Logger::$enable = true;
+    }
+
     private function doRequest($message_array)
     {
         $ch = curl_init($this->url);
@@ -396,10 +433,13 @@ class DataConsumer extends AbstractConsumer
 
 class Logger
 {
+    static $enable = false;
     static function log()
     {
-        $params = implode("", func_get_args());
-        $time = date("Y-m-d H:i:s", time());
-        echo "[LGDS][{$time}]: ", $params, PHP_EOL;
+        if (self::$enable){
+            $params = implode("", func_get_args());
+            $time = date("Y-m-d H:i:s", time());
+            echo "[LGDS][{$time}]: ", $params, PHP_EOL;
+        }
     }
 }
