@@ -3,7 +3,7 @@
 require 'LgdsSdk.php';
 
 try {
-    $server_url = "https://datalog-v2.66yytx.com/logagent";
+    $server_url = "";
     $appid ="xxxxxx";
     $ak = "xxxxx";
     $sk = "xxxx";
