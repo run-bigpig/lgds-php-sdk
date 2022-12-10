@@ -159,8 +159,8 @@ class LgdsSdk
 
     private function getUtcTime()
     {
-        date_default_timezone_set("UTC");
-        return date("Y-m-d H:i:s", time());
+        $now = new DateTime(null,new DateTimeZone("UTC"));
+        return $now->format("Y-m-d H:i:s");
     }
 
     private function extractStringProperty($key, &$properties = array())
@@ -296,8 +296,8 @@ class DataConsumer extends AbstractConsumer
 
     private function signature($salt)
     {
-        date_default_timezone_set("UTC");
-        $timestr = date("Y-m-d H:i", time());
+        $now  = new DateTime(null,new DateTimeZone("UTC"));
+        $timestr = $now->format("Y-m-d H:i");
         return hash("sha256", sprintf("%s%s%s%s", $this->accessKey, $this->secretKey, $salt, $timestr));
     }
 
