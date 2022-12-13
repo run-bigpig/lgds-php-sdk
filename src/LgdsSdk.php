@@ -159,7 +159,7 @@ class LgdsSdk
 
     private function getUtcTime()
     {
-        $now = new DateTime(null,new DateTimeZone("UTC"));
+        $now = new DateTime(null, new DateTimeZone("UTC"));
         return $now->format("Y-m-d H:i:s");
     }
 
@@ -296,7 +296,7 @@ class DataConsumer extends AbstractConsumer
 
     private function signature($salt)
     {
-        $now  = new DateTime(null,new DateTimeZone("UTC"));
+        $now = new DateTime(null, new DateTimeZone("UTC"));
         $timestr = $now->format("Y-m-d H:i");
         return hash("sha256", sprintf("%s%s%s%s", $this->accessKey, $this->secretKey, $salt, $timestr));
     }
@@ -319,7 +319,7 @@ class DataConsumer extends AbstractConsumer
             Logger::log("触发数据上报");
             return $this->flush();
         } else {
-            Logger::log("加入缓存".json_encode($message));
+            Logger::log("加入缓存" . json_encode($message));
             return true;
         }
     }
@@ -434,9 +434,10 @@ class DataConsumer extends AbstractConsumer
 class Logger
 {
     static $enable = false;
+
     static function log()
     {
-        if (self::$enable){
+        if (self::$enable) {
             $params = implode("", func_get_args());
             $time = date("Y-m-d H:i:s", time());
             echo "[LGDS][{$time}]: ", $params, PHP_EOL;
